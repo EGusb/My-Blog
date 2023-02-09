@@ -31,8 +31,8 @@ app.get("/compose", function (req, res) {
 });
 
 app.post("/compose", function (req, res) {
-  console.log(`Title: '${req.body.newPostTitle}'`);
-  console.log(`Text:  '${req.body.newPostText}'`);
+  console.log(`Title: '${req.body.postTitle}'`);
+  console.log(`Text:  '${req.body.postBody}'`);
   res.redirect("/compose");
 });
 
