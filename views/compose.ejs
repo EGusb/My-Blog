@@ -3,22 +3,28 @@
 <h1><%= title %></h1>
 <form action="/compose" method="post">
   <div class="form-group">
-      <label for="newPostTitle">Title</label>
-      <input type="text" name="newPostTitle" class="form-control" required autocomplete="off" />
-    </div>
-    <div class="form-group">
-      <label for="newPostText">Post</label>
-      <textarea
-        name="newPostText"
-		class="form-control"
-        rows="10"
-        required
-        autocomplete="off"
-      ></textarea>
-    </div>
-    <div class="form-group">
-      <button type="submit" class="btn btn-primary" name="button">Publish</button>
-    </div>
+    <label for="newPostTitle">Title</label>
+    <input
+      type="text"
+      name="newPostTitle"
+      class="form-control"
+      required
+      autocomplete="off"
+    />
+  </div>
+  <div class="form-group">
+    <label for="newPostText">Post</label>
+    <textarea
+      name="newPostText"
+      class="form-control"
+      rows="10"
+      required
+      autocomplete="off"
+    >
+    </textarea>
+  </div>
+  <div class="form-group">
+    <button type="submit" class="btn btn-primary" name="button">Publish</button>
   </div>
 </form>
 
