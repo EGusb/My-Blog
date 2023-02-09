@@ -22,12 +22,22 @@ app.get("/", function (req, res) {
   res.render("home", { title: "Home", content: homeStartingContent });
 });
 
-app.get("/contact", function (req, res) {
-  res.render("contact", { title: "Contact", content: contactContent });
-});
-
 app.get("/about", function (req, res) {
   res.render("about", { title: "About", content: aboutContent });
+});
+
+app.get("/compose", function (req, res) {
+  res.render("compose", { title: "Compose" });
+});
+
+app.post("/compose", function (req, res) {
+  console.log(`Title: '${req.body.newPostTitle}'`);
+  console.log(`Text:  '${req.body.newPostText}'`);
+  res.redirect("/compose");
+});
+
+app.get("/contact", function (req, res) {
+  res.render("contact", { title: "Contact", content: contactContent });
 });
 
 const hostname = process.env.HOST || "localhost";
