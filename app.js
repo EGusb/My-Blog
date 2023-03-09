@@ -11,21 +11,27 @@ app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true })); // Required to parse requests
 app.use(express.static("public"));
 
-const data = require(__dirname + "/exampleData.js");
+const models = require(__dirname + "/models.js");
+const Post = models.Post;
 
-let posts = data.posts;
-let postId = data.postId;
+const defaultData = require(__dirname + "/defaultData.js");
 
 app.get("/", function (req, res) {
-  res.render("home", {
-    title: "Home",
-    content: data.homeStartingContent,
-    posts: posts,
+  Post.find({}, function (err, docs) {
+    if (err) {
+      renderErrorPage(res, err, 500);
+    } else {
+      res.render("home", {
+        title: "Home",
+        content: defaultData.homeStartingContent,
+        posts: docs,
+      });
+    }
   });
 });
 
 app.get("/about", function (req, res) {
-  res.render("about", { title: "About", content: data.aboutContent });
+  res.render("post", { title: "About", content: defaultData.aboutContent });
 });
 
 app.get("/posts/:postId", function (req, res) {
@@ -57,27 +63,37 @@ app.post("/compose", function (req, res) {
 });
 
 app.get("/contact", function (req, res) {
-  res.render("contact", { title: "Contact", content: data.contactContent });
+  res.render("post", {
+    title: "Contact",
+    content: defaultData.contactContent,
+  });
 });
-
-const hostname = process.env.HOST || "localhost";
-
-// HTTP config
-const http_port = process.env.HTTP_PORT || 80;
-const http_server = http.createServer(app);
 
 // HTTPS config
-const options = {
-  key: fs.readFileSync("./server.key"),
-  cert: fs.readFileSync("./server.cert"),
-};
-const https_port = process.env.HTTPS_PORT || 443;
-const https_server = https.createServer(options, app);
+const httpsPort = process.env.HTTPS_PORT || 443;
+const hostname = process.env.HOST || "localhost";
+const fullHttpsUrl = `https://${hostname}:${httpsPort}`;
+const httpsServer = https.createServer(
+  {
+    key: fs.readFileSync("./server.key"),
+    cert: fs.readFileSync("./server.cert"),
+  },
+  app
+);
 
-http_server.listen(http_port, hostname, function () {
-  console.log(`HTTP server started on http://${hostname}:${http_port}`);
+httpsServer.listen(httpsPort, hostname, function () {
+  console.log(`HTTPS server started on ${fullHttpsUrl}`);
 });
 
-https_server.listen(https_port, hostname, function () {
-  console.log(`HTTPS server started on https://${hostname}:${https_port}`);
+// HTTP config
+const httpApp = express();
+httpApp.all("*", function (req, res) {
+  res.redirect(301, fullHttpsUrl);
+});
+const httpPort = process.env.HTTP_PORT || 80;
+const fullHttpUrl = `http://${hostname}:${httpPort}`;
+
+const httpServer = http.createServer(httpApp);
+httpServer.listen(httpPort, hostname, function () {
+  console.log(`HTTP  server started on ${fullHttpUrl}`);
 });
