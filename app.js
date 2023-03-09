@@ -16,6 +16,20 @@ const Post = models.Post;
 
 const defaultData = require(__dirname + "/defaultData.js");
 
+function renderErrorPage(res, err, statusCode, msg = "ERROR") {
+  let msgShow = "";
+  if (err === null) {
+    msgShow = msg;
+  } else {
+    msgShow = err.message || msg;
+    console.log(err);
+  }
+  res.status(statusCode).render("post", {
+    title: `ERROR ${statusCode}`,
+    content: msgShow,
+  });
+}
+
 app.get("/", function (req, res) {
   Post.find({}, function (err, docs) {
     if (err) {
@@ -35,15 +49,19 @@ app.get("/about", function (req, res) {
 });
 
 app.get("/posts/:postId", function (req, res) {
-  post = posts.find(function (post) {
-    return post.postId === Number(req.params.postId);
-  });
+  const postId = req.params.postId;
 
-  if (post) {
-    res.render("post", { title: post.title, content: post.body });
-  } else {
-    res.redirect("/");
-  }
+  Post.findOne({ _id: postId }, function (err, post) {
+    if (err) { // ID is wrong or doesn't exist
+      renderErrorPage(res, err, 500);
+    } else {
+      if (post) {
+        res.render("post", { title: post.title, content: post.body });
+      } else {
+        renderErrorPage(res, err, 404, "Page not found.");
+      }
+    }
+  });
 });
 
 app.get("/compose", function (req, res) {
@@ -51,15 +69,16 @@ app.get("/compose", function (req, res) {
 });
 
 app.post("/compose", function (req, res) {
-  postId += 1;
+  const title = req.body.postTitle;
+  const body = req.body.postBody;
 
-  posts.push({
-    postId: postId,
-    title: req.body.postTitle,
-    body: req.body.postBody,
+  Post.create({ title: title, body: body }, function (err, doc) {
+    if (err) {
+      renderErrorPage(res, err, 500);
+    } else {
+      res.redirect(`/posts/${doc._id}`);
+    }
   });
-
-  res.redirect("/");
 });
 
 app.get("/contact", function (req, res) {
